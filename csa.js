@@ -2,34 +2,34 @@
  * Encrypt
  * encrypt text using given key
  */
-async function encrypt(text, key, loop=true) {
-	// step 0. validate input
-  if (text.length > 128) throw("message too large (128 max)")
-	if (key.length < 16) throw("key size too small (16 min)")
+async function encrypt(text, key, loop = true) {
+  // step 0. validate input
+  if (text.length > 128) throw "message too large (128 max)";
+  if (key.length < 16) throw "key size too small (16 min)";
   // step 1. generate hash from they key
   const hash = await sha512(btoa(key));
-	const pads = hash.length - text.length
+  const pads = hash.length - text.length;
   // step 2. convert to UInt8Array
   const ecode = new TextEncoder();
   const codex = ecode.encode(hash);
   const array = ecode.encode(text);
   // step 3. offset the XORs
-	const multiplier = text.length * key.length
-	const round = array.map((value, i) => {
-		const index = ((i + 1) * multiplier) % codex.length
-    return value ^ codex[index]
+  const multiplier = text.length * key.length;
+  const round = array.map((value, i) => {
+    const index = ((i + 1) * multiplier) % codex.length;
+    return value ^ codex[index];
   });
 
   // step 4. convert to string
   const dcode = new TextDecoder();
   let value = dcode.decode(round);
-  
-	// step 5. add additional rounds
-	if (loop === true) {
-  	value = encrypt(value, hash + key, false)
+
+  // step 5. add additional rounds
+  if (loop === true) {
+    value = encrypt(value, hash + key, false);
   }
-	
-	// step 6. return value as string
+
+  // step 6. return value as string
   return value;
 }
 
@@ -47,7 +47,7 @@ async function decrypt(text, key) {
   const array = encoder.encode(text);
   // step 3. xor the results
   const output = array.map((value, i) => {
-		const index = ((i + 1) * value) % codex.length
+    const index = ((i + 1) * value) % codex.length;
     return value ^ codex[index];
   });
   // step 4. convert to string
@@ -55,7 +55,6 @@ async function decrypt(text, key) {
   // step 5. return results
   return value;
 }
-
 
 /**
  * Generate sha512 digest
@@ -79,7 +78,7 @@ async function main() {
   const msg = "my namme is colin";
   const out = await encrypt(msg, key);
   console.log({ out, len: out.length });
-	const txt = await encrypt(out, key);
+  const txt = await encrypt(out, key);
   console.log({ txt, len: txt.length });
 }
 
